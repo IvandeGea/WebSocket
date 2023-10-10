@@ -26,27 +26,43 @@ app.get('/auth/google',
 
 app.get('/auth/google/callback',
   passport.authenticate('google', {
-    successRedirect: '/protected',
+    successRedirect: '/process-authentication',
     failureRedirect: '/auth/google/failure'
   })
 );
 
-app.get('/protected', isLoggedIn, (req, res) => {
-    // Imprime el objeto completo del usuario en la consola
-    console.log('Usuario autenticado en /protected:', req.user);
+app.get('/process-authentication', isLoggedIn, (req, res) => {
+    // Imprimir el objeto de perfil de Google en la consola
+    console.log('Perfil de Google:', req.user);
   
-    // Verifica si la propiedad 'email' existe en el objeto 'req.user'
-    if (req.user && req.user.email) {
-      // Accede a la dirección de correo electrónico
-      const userEmail = req.user.email;
-      res.send(`Hello ${req.user.displayName}~${userEmail}`);
+    // Verificar si la propiedad 'emails' existe y tiene elementos
+    if (req.user && req.user.emails && req.user.emails.length > 0) {
+      // Crear un nuevo usuario y guardarlo en MongoDB
+      const newUser = new User({
+        googleId: req.user.id,
+        displayName: req.user.displayName,
+        email: req.user.email,
+        // Otros campos según necesidades
+      });
+  
+      newUser.save()
+        .then(() => {
+          console.log('Usuario guardado correctamente en MongoDB');
+          // Redirigir a la página principal u otra página
+          res.redirect('/');
+        })
+        .catch((err) => {
+          console.error('Error al guardar el usuario en MongoDB:', err);
+          // Redirigir a una página de error
+          res.redirect('/error');
+        });
     } else {
       console.error('No se puede obtener la dirección de correo electrónico del perfil de Google');
-      // Redirige a una página de error o de solicitud de correo electrónico
+      // Redirigir a una página de error o de solicitud de correo electrónico
       res.redirect('/auth/email-required');
     }
   });
-  
+
 app.get('/logout', (req, res) => {
   req.logout();
   req.session.destroy();
