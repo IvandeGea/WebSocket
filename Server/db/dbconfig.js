@@ -1,13 +1,16 @@
 const mongoose = require('mongoose');
 
-mongoose.connect('mongodb://localhost:27017/tu_base_de_datos', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+const connectDB = async () => {
+  try {
+    await mongoose.connect('mongodb+srv://User:1234@todolist.x8ilx1a.mongodb.net/?retryWrites=true&w=majority', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
 
+    console.log('Conexión exitosa a MongoDB');
+  } catch (error) {
+    console.error('Error de conexión a MongoDB:', error);
+  }
+};
 
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'Error de conexión a MongoDB:'));
-db.once('open', () => {
-  console.log('Conexión exitosa a MongoDB');
-});
+module.exports = connectDB;
