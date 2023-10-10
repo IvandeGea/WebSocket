@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "dev": "ts-node-dev --respawn --transpile-only ./server/server.ts",
-    "start": "ts-node ./Server/server.ts",
+    "start": "node ./Server/server.js",
     "build": "npx tsc"
   },
   "author": "",
@@ -37,7 +37,7 @@
     "express": "^4.18.2",
     "express-session": "^1.17.3",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.6.0",
+    "mongoose": "^7.6.1",
     "nodemon": "^3.0.1",
     "passport": "^0.6.0",
     "passport-google-oauth2": "^0.2.0",

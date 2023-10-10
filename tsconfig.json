@@ -13,7 +13,6 @@
     "noEmit": false,
     "resolveJsonModule": true,
     "noUnusedLocals": true,
-    "outDir": "./dist",
     "experimentalDecorators": true,
     "baseUrl": "./",
   "paths": {
