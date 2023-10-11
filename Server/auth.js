@@ -16,16 +16,17 @@ async function(request, accessToken, refreshToken, profile, done) {
     try{
         const existingUser = await User.findOne({ googleId: profile.id });
         if (existingUser) {
+            console.log('Usuario ya existe en MongoDB');
           return done(null, existingUser);
         }
 
         const newUser = new User({
           googleId: profile.id,
           displayName: profile.displayName,
-          email: profile.emails[0].value,
         });
         await newUser.save();
         done(null, newUser);
+        console.log('Usuario guardado correctamente en MongoDB');
     }catch(err){
         done(err, null);
     }
@@ -33,9 +34,16 @@ async function(request, accessToken, refreshToken, profile, done) {
 }));
 
 passport.serializeUser(function(user, done) {
-  done(null, user);
+    done(null, user.id);
 });
 
-passport.deserializeUser(function(user, done) {
-  done(null, user);
+
+passport.deserializeUser(async function(id, done) {
+    try {
+        const user = await User.findById(id);
+        done(null, user);
+    } catch (error) {
+        done(error, null);
+    }
 });
+
