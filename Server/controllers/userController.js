@@ -1,18 +1,28 @@
-const User = require('../models/userSchema');
-const message= require('../models/messageSchema');
+const User = require('../db/userSchema');
 
 
-async function addMessage(req, res) {
+async function addMessageById(req, res) {
   try {
-    // Obtén el usuario actual desde la sesión (suponiendo que estás utilizando Passport)
-    const currentUser = req.user;
+    // Obtén el ID del usuario desde la URL
+    const userId = req.params.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'ID de usuario no encontrado en la URL' });
+    }
+
+    // Busca al usuario en la base de datos por su ID
+    const currentUser = await User.findById(userId);
 
     if (!currentUser) {
-      return res.status(401).json({ error: 'Usuario no  encontrado' });
+      return res.status(404).json({ error: 'Usuario no encontrado en la base de datos' });
     }
 
     // Extrae el texto del mensaje del cuerpo de la solicitud
     const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ error: 'Propiedad "text" no encontrada en el cuerpo de la solicitud' });
+    }
 
     // Crea un nuevo mensaje
     const newMessage = {
@@ -33,4 +43,4 @@ async function addMessage(req, res) {
   }
 }
 
-module.exports = { addMessage };
+module.exports = { addMessageById };

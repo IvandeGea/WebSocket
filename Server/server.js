@@ -3,9 +3,13 @@ const session = require('express-session');
 const passport = require('passport');
 require('./auth');
 const connectDB = require('./db/dbconfig')
+const messageRoutes = require('./routes');
 
 const app = express();
+app.use(express.json());
+
 connectDB()
+
 
 function isLoggedIn(req, res, next) {
   req.user ? next() : res.sendStatus(401);
@@ -47,5 +51,7 @@ app.get('/logout', (req, res) => {
 app.get('/auth/google/failure', (req, res) => {
   res.send('Failed to authenticate..');
 });
+
+app.use('/messages', messageRoutes);
 
 app.listen(5000, () => console.log('listening on port: 5000'));

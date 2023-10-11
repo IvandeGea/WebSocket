@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { addMessage } = require('../controllers/messageController');
+const userController = require('./controllers/userController');
 
-// Ruta para agregar un mensaje a un usuario
-router.post('/addMessage', addMessage);
+// Ruta para añadir un mensaje al usuario por ID
+router.put('/users/:id/addMessage', userController.addMessageById);
 
 module.exports = router;

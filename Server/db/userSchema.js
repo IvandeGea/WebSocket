@@ -6,7 +6,7 @@ const messageSchema = require('./messageSchema');
 const userSchema = new mongoose.Schema({
   googleId: { type: String, required: true },
   displayName: { type: String, required: true },
-  messages: [messageSchema]
+  messages: []
 });
 
 const User = mongoose.model('User', userSchema);

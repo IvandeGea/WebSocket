@@ -35,13 +35,17 @@ async function(request, accessToken, refreshToken, profile, done) {
 
 passport.serializeUser(function(user, done) {
     done(null, user.id);
+    console.log('Usuario serializado', user);
 });
 
 
 passport.deserializeUser(async function(id, done) {
     try {
         const user = await User.findById(id);
+        
         done(null, user);
+        console.log('Usuario deserializado', user);
+       
     } catch (error) {
         done(error, null);
     }
