@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const connectDB = async () => {
+const connectDB = async (): Promise<void> => {
   try {
     await mongoose.connect('mongodb+srv://User:1234@todolist.x8ilx1a.mongodb.net/Chat?retryWrites=true&w=majority', {
       useNewUrlParser: true,
@@ -13,4 +13,4 @@ const connectDB = async () => {
   }
 };
 
-module.exports = connectDB;
+export default connectDB;
