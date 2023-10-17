@@ -1,19 +1,20 @@
 
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { Request } from 'express';
+import { Request, Response } from 'express'; // Importa también Response
 import dotenv from 'dotenv';
 import User from './db/userSchema';
 
 dotenv.config();
 
-const GOOGLE_CLIENT_ID = "72365737421-4vob7i0jok1j6drm83jdklb260i4njbi.apps.googleusercontent.com";
-const GOOGLE_CLIENT_SECRET = "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";
+const GOOGLE_CLIENT_ID = "72365737421-6chsiivuem3to740gtbeep4b4gtr75eg.apps.googleusercontent.com";
+const GOOGLE_CLIENT_SECRET = "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";
+// const JWT_SECRET = "your_jwt_secret"; // Comentado porque no se utiliza
 
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
   clientSecret: GOOGLE_CLIENT_SECRET,
-  callbackURL: "http://localhost:5000/auth/google/callback",
+  callbackURL: "http://localhost:3001/auth/google/callback",
   passReqToCallback: true,
 },
 async function(request: Request, accessToken: string, refreshToken: string, profile: any, done: any) {
@@ -21,25 +22,63 @@ async function(request: Request, accessToken: string, refreshToken: string, prof
         const existingUser = await User.findOne({ googleId: profile.id });
         if (existingUser) {
             console.log('Usuario ya existe en MongoDB');
-            return done(null, existingUser);
-        }
 
-        const newUser = new User({
-            googleId: profile.id,
-            displayName: profile.displayName,
-        });
-        await newUser.save();
-        done(null, newUser);
-        console.log('Usuario guardado correctamente en MongoDB');
+            // Añadir el usuario a la sesión (y por ende, a la cookie)
+            if (request.res) {
+              request.res.cookie('userId', existingUser.id);
+              request.res.cookie('displayName', existingUser.displayName);
+            }
+
+            request.login(existingUser, (loginError) => {
+              if (loginError) {
+                return done(loginError);
+              }
+              console.log('Usuario logueado correctamente');
+              return done(null, existingUser);
+            });
+        } else {
+            const newUser = new User({
+                googleId: profile.id,
+                displayName: profile.displayName,
+                email: profile.emails[0].value,
+            });
+
+            try {
+                await newUser.save();
+                console.log('Usuario guardado correctamente en MongoDB');
+
+                // Añadir el usuario a la sesión (y por ende, a la cookie)
+                if (request.res) {
+                  request.res.cookie('userId', newUser.id);
+                  request.res.cookie('displayName', newUser.displayName);
+                }
+
+                request.login(newUser, (loginError) => {
+                  if (loginError) {
+                    return done(loginError);
+                  }
+                  console.log('Usuario logueado correctamente');
+                  return done(null, newUser);
+                });
+            } catch (saveError) {
+                console.error('Error al guardar el usuario en MongoDB:', saveError);
+                done(saveError, null);
+            }
+        }
     } catch (err) {
+        console.error('Error durante la autenticación de Google:', err);
         done(err, null);
     }
-    return done(null, profile);
 }));
 
 passport.serializeUser(function(user: any, done: any) {
-    done(null, user.id);
-    console.log('Usuario serializado', user);
+    try {
+        done(null, user.id);
+        console.log('Usuario serializado', user);
+    } catch (err) {
+        console.error('Error al serializar el usuario:', err);
+        done(err, null);
+    }
 });
 
 passport.deserializeUser(async function(id: string, done: any) {
@@ -48,65 +87,14 @@ passport.deserializeUser(async function(id: string, done: any) {
         done(null, user);
         console.log('Usuario deserializado', user);
     } catch (error) {
+        console.error('Error al deserializar el usuario:', error);
         done(error, null);
     }
 });
 
+export default passport;
 
 
 
 
-
-// const passport = require('passport');
-// const GoogleStrategy = require('passport-google-oauth20').Strategy;
-// require('dotenv').config();
-// const User = require('./db/userSchema');
-
-// const GOOGLE_CLIENT_ID = "72365737421-4vob7i0jok1j6drm83jdklb260i4njbi.apps.googleusercontent.com"
-// const GOOGLE_CLIENT_SECRET = "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";
-
-// passport.use(new GoogleStrategy({
-//   clientID: GOOGLE_CLIENT_ID,
-//   clientSecret: GOOGLE_CLIENT_SECRET,
-//   callbackURL: "http://localhost:5000/auth/google/callback",
-//   passReqToCallback: true,
-// },
-// async function(request, accessToken, refreshToken, profile, done) {
-//     try{
-//         const existingUser = await User.findOne({ googleId: profile.id });
-//         if (existingUser) {
-//             console.log('Usuario ya existe en MongoDB');
-//           return done(null, existingUser);
-//         }
-
-//         const newUser = new User({
-//           googleId: profile.id,
-//           displayName: profile.displayName,
-//         });
-//         await newUser.save();
-//         done(null, newUser);
-//         console.log('Usuario guardado correctamente en MongoDB');
-//     }catch(err){
-//         done(err, null);
-//     }
-//   return done(null, profile);
-// }));
-
-// passport.serializeUser(function(user, done) {
-//     done(null, user.id);
-//     console.log('Usuario serializado', user);
-// });
-
-
-// passport.deserializeUser(async function(id, done) {
-//     try {
-//         const user = await User.findById(id);
-        
-//         done(null, user);
-//         console.log('Usuario deserializado', user);
-       
-//     } catch (error) {
-//         done(error, null);
-//     }
-// });
 

@@ -51,16 +51,14 @@ export const addMessageById = async (req: Request, res: Response) => {
 
 //muestra todos los mensajes
 
-// messageController.ts
 
 
 export const getAllMessages = async (req: Request, res: Response) => {
   try {
 
-    console.log("Entro al controlador getAllMessages")
     // Obtener todos los usuarios con mensajes
     const usersWithMessages: UserDocument[] = await User.find({ messages: { $exists: true, $ne: [] } });
-    console.log('Usuarios con mensajes:', usersWithMessages);
+    
 
     // Obtener los mensajes de todos los usuarios con el nombre del usuario
     const allMessages: { text: string; createdAt: Date; userName: string }[] = usersWithMessages.reduce(
@@ -80,7 +78,7 @@ export const getAllMessages = async (req: Request, res: Response) => {
 
     // Ordenar mensajes por fecha de creación (en orden ascendente)
     const sortedMessages = allMessages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
- console.log('Mensajes ordenados:', sortedMessages);
+
     return res.status(200).json({ messages: sortedMessages });
   } catch (error) {
     console.error('Error al obtener mensajes:', error);

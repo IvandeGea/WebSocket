@@ -7,6 +7,7 @@ import './auth';
 import connectDB from './db/dbconfig';
 import { router as messageRouter } from './routes';
 import cors from "cors"
+import cookieParser from 'cookie-parser';
 
 
 const app = express();
@@ -15,28 +16,27 @@ app.use(cors({
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
 }));
+
 app.use(express.json());
 
 connectDB();
 
-function isLoggedIn(req: Request, res: Response, next: NextFunction) {
-  req.user ? next() : res.sendStatus(401);
-}
+// function isLoggedIn(req: Request, res: Response, next: NextFunction) {
+//   req.user ? next() : res.sendStatus(401);
+// }
 
 app.use(
   session({
-    secret: 'cats',
+    secret: 'keyboard cat',
     resave: false,
-    saveUninitialized: true,
-    cookie: {
-      secure: false,
-      maxAge: 60000,
-    },
+    saveUninitialized: true
   })
 );
 
 app.use(passport.initialize());
 app.use(passport.session());
+
+app.use(cookieParser());
 
 app.get('/', (req: Request, res: Response) => {
   res.send('<a href="/auth/google">Authenticate with Google</a>');
@@ -50,12 +50,12 @@ app.get(
 app.get(
   '/auth/google/callback',
   passport.authenticate('google', {
+    successRedirect: 'http://localhost:5173/chat',
     failureRedirect: '/auth/google/failure',
   })
 );
 
 
-app.get('/protected', isLoggedIn, async (req: Request, res: Response) => {});
 
 app.get('/logout', (req: Request, res: Response) => {
   (req.logout as any)();
@@ -68,12 +68,9 @@ app.get('/auth/google/failure', (req: Request, res: Response) => {
   res.send('Failed to authenticate..');
 });
 
-
-
 app.use('/', messageRouter);
 
 const server= app.listen(3001, () => console.log('listening on port: 3001'));
-
 
 const io = require('socket.io')(server,{
   pingTimeout: 60000,
@@ -84,6 +81,5 @@ const io = require('socket.io')(server,{
 
 io.on('connection', (socket: any) => {
   console.log('Connected to socket.io');
-
 }
 );
