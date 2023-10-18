@@ -1,7 +1,7 @@
 
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-import { Request, Response } from 'express'; // Importa también Response
+import { Request} from 'express'; 
 import dotenv from 'dotenv';
 import User from './db/userSchema';
 
@@ -9,7 +9,7 @@ dotenv.config();
 
 const GOOGLE_CLIENT_ID = "72365737421-6chsiivuem3to740gtbeep4b4gtr75eg.apps.googleusercontent.com";
 const GOOGLE_CLIENT_SECRET = "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";
-// const JWT_SECRET = "your_jwt_secret"; // Comentado porque no se utiliza
+
 
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
@@ -23,10 +23,11 @@ async function(request: Request, accessToken: string, refreshToken: string, prof
         if (existingUser) {
             console.log('Usuario ya existe en MongoDB');
 
-            // Añadir el usuario a la sesión (y por ende, a la cookie)
+           
             if (request.res) {
               request.res.cookie('userId', existingUser.id);
               request.res.cookie('displayName', existingUser.displayName);
+              console.log('Cookies creadas');
             }
 
             request.login(existingUser, (loginError) => {
@@ -47,10 +48,11 @@ async function(request: Request, accessToken: string, refreshToken: string, prof
                 await newUser.save();
                 console.log('Usuario guardado correctamente en MongoDB');
 
-                // Añadir el usuario a la sesión (y por ende, a la cookie)
+                
                 if (request.res) {
                   request.res.cookie('userId', newUser.id);
                   request.res.cookie('displayName', newUser.displayName);
+                  console.log('Cookies creadas');
                 }
 
                 request.login(newUser, (loginError) => {

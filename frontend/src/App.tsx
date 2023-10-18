@@ -1,9 +1,9 @@
 
-import { Route, Link } from 'react-router-dom'
+import { Route, Redirect } from 'react-router-dom'
 import './App.css'
 import HomePage from './pages/HomePage'
 import ChatPage from './pages/ChatPage'
-
+import { isUserAuthenticated } from './middlewares'
 function App() {
 
 
@@ -14,8 +14,11 @@ function App() {
   </nav>
  
   <Route path="/" component={HomePage} exact/>
-  <Route path="/chat" component={ChatPage}/>
-  </div>)
+  <Route path="/chat"
+         render={() => ( isUserAuthenticated() ? <ChatPage /> : <Redirect to="/" /> )}
+      />
+    </div>
+  );
 
 }
 

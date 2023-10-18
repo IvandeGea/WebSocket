@@ -5,21 +5,6 @@ interface ChatMessageProps {
   message: any;
 }
 
-// const getUsernameColor = (userName) => {
-//   // Convierte el nombre de usuario a un número hash
-//   let hash = 0;
-//   for (let i = 0; i < username.length; i++) {
-//     hash = username.charCodeAt(i) + ((hash << 5) - hash);
-//   }
-
-//   // Calcula el color usando el hash
-//   const color = Math.abs((hash & 0x00FFFFFF) % 0xFFFFFF).toString(16);
-  
-//   // Añade ceros iniciales si es necesario
-//   const paddedColor = `#${'00000'.slice(0, 6 - color.length)}${color}`;
-
-//   return paddedColor;
-// };
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
   return (

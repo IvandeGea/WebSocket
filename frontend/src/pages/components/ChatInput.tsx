@@ -22,13 +22,12 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
       return;
     }
 
-    // Extrae el valor de la cookie
     const userId = userIdCookie.split('=')[1].trim();
-    console.log('UserID:', userId);
+   
 
     if (message.trim() !== '' && userId) {
       try {
-        // Realiza una solicitud POST al backend para agregar un mensaje
+
         const response = await fetch(`http://localhost:3001/${userId}/addMessage`, {
           method: 'PUT',
           headers: {
@@ -40,10 +39,9 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
         });
 
         if (response.ok) {
-          // Maneja la respuesta exitosa como desees
+   
           const responseData = await response.json();
           console.log('Mensaje enviado:', responseData);
-          // Llama a la función onSendMessage con el mensaje y el ID del usuario
           onSendMessage(message, userId);
           setMessage('');
         } else {

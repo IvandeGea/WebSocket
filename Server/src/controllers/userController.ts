@@ -59,12 +59,10 @@ export const getAllMessages = async (req: Request, res: Response) => {
     // Obtener todos los usuarios con mensajes
     const usersWithMessages: UserDocument[] = await User.find({ messages: { $exists: true, $ne: [] } });
     
-
-    // Obtener los mensajes de todos los usuarios con el nombre del usuario
+    
     const allMessages: { text: string; createdAt: Date; userName: string }[] = usersWithMessages.reduce(
       (messages: { text: string; createdAt: Date; userName: string }[], user: UserDocument) => {
-        const userName = user.displayName || 'Usuario Desconocido'; // Nombre del usuario o un valor predeterminado si no hay nombre
-
+        const userName = user.displayName  
         const userMessages = user.messages.map((message: Message) => ({
           text: message.text,
           createdAt: message.createdAt,
@@ -75,8 +73,6 @@ export const getAllMessages = async (req: Request, res: Response) => {
       },
       []
     );
-
-    // Ordenar mensajes por fecha de creación (en orden ascendente)
     const sortedMessages = allMessages.sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
 
     return res.status(200).json({ messages: sortedMessages });
@@ -85,3 +81,23 @@ export const getAllMessages = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Error interno del servidor' });
   }
 };
+
+export const logout = (req: Request, res: Response) => {
+  
+  (req.logout as any)();
+
+ 
+  req.session.destroy(() => {
+   
+    res.setHeader('Set-Cookie', [
+      'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/',
+      'displayName=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/',
+      'userId=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/',
+    ]);
+
+  });
+};
+
+
+//autentificacion y creacion de usuarios
+

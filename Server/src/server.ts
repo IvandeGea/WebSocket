@@ -1,6 +1,6 @@
 
 
-import express, { Request, Response, NextFunction } from 'express';
+import express, { Request, Response, NextFunction} from 'express';
 import session from 'express-session';
 import passport from 'passport';
 import './auth';
@@ -8,22 +8,30 @@ import connectDB from './db/dbconfig';
 import { router as messageRouter } from './routes';
 import cors from "cors"
 import cookieParser from 'cookie-parser';
-
+import http from "http";
+import { Server as SocketIOServer, Socket } from 'socket.io';
+import { isLoggedIn } from './middleware';
 
 const app = express();
-app.use(cors({
-  origin: 'http://localhost:5173',
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-  credentials: true,
-}));
 
+const server = http.createServer(app); // Crea un servidor HTTP usando express
+
+const corsOptions = {
+  origin: 'http://localhost:5173',  
+  credentials: true,
+};
+
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: '*',
+    credentials: true,
+  },
+});
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 connectDB();
-
-// function isLoggedIn(req: Request, res: Response, next: NextFunction) {
-//   req.user ? next() : res.sendStatus(401);
-// }
 
 app.use(
   session({
@@ -38,9 +46,6 @@ app.use(passport.session());
 
 app.use(cookieParser());
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('<a href="/auth/google">Authenticate with Google</a>');
-});
 
 app.get(
   '/auth/google',
@@ -55,14 +60,12 @@ app.get(
   })
 );
 
-
-
-app.get('/logout', (req: Request, res: Response) => {
-  (req.logout as any)();
-  req.session.destroy(() => {
-    res.send('Goodbye!');
-  });
-});
+// app.get('/logout',isLoggedIn,(req: Request, res: Response) => {
+//   (req.logout as any)();
+//   req.session.destroy(() => {
+//     res.send('Goodbye!');
+//   });
+// });
 
 app.get('/auth/google/failure', (req: Request, res: Response) => {
   res.send('Failed to authenticate..');
@@ -70,16 +73,30 @@ app.get('/auth/google/failure', (req: Request, res: Response) => {
 
 app.use('/', messageRouter);
 
-const server= app.listen(3001, () => console.log('listening on port: 3001'));
-
-const io = require('socket.io')(server,{
-  pingTimeout: 60000,
-  cors: {
-    origin: 'http://localhost:3001',
-  },
+app.use((req, res, next) => {
+  res.redirect('http://localhost:5173');
 });
 
-io.on('connection', (socket: any) => {
-  console.log('Connected to socket.io');
-}
-);
+
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error(err.stack);
+  res.status(500).send('Something went wrong!');
+});
+
+io.on('connection', (socket: Socket) => {
+  console.log('Usuario conectado:', socket.id);
+
+  // Escucha el evento 'message' y emite el mensaje a todos los clientes
+  socket.on('message', (data) => {
+    console.log('Nuevo mensaje:', data);
+    io.emit('message', data); // Aquí envía tanto el texto como el nombre de usuario
+  });
+
+  // Maneja la desconexión del usuario
+  socket.on('disconnect', () => {
+    console.log('Usuario desconectado:', socket.id);
+  });
+});
+
+server.listen(3001, () => console.log('listening on port: 3001'));
+

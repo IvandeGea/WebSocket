@@ -10,7 +10,7 @@ import { FaGoogle } from 'react-icons/fa';
   return (
     <Flex justifyContent="center">
       <Button
-        leftIcon={<FaGoogle  style={{ color: '#4285F4' }} />}
+        leftIcon={<FaGoogle  style={{ color: 'red' }} />}
         colorScheme="blue" 
         variant="solid"
         onClick={handleGoogleLogin}
