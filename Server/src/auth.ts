@@ -7,9 +7,11 @@ import User from './db/userSchema';
 
 dotenv.config();
 
-const GOOGLE_CLIENT_ID = "72365737421-6chsiivuem3to740gtbeep4b4gtr75eg.apps.googleusercontent.com";
-const GOOGLE_CLIENT_SECRET = "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";
+console.log(process.env.PORT)
 
+
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!
 
 passport.use(new GoogleStrategy({
   clientID: GOOGLE_CLIENT_ID,
@@ -76,18 +78,19 @@ async function(request: Request, accessToken: string, refreshToken: string, prof
 passport.serializeUser(function(user: any, done: any) {
     try {
         done(null, user.id);
-        console.log('Usuario serializado', user);
     } catch (err) {
         console.error('Error al serializar el usuario:', err);
         done(err, null);
     }
 });
 
+
+//GENERICOOOS
+
 passport.deserializeUser(async function(id: string, done: any) {
     try {
         const user = await User.findById(id);
         done(null, user);
-        console.log('Usuario deserializado', user);
     } catch (error) {
         console.error('Error al deserializar el usuario:', error);
         done(error, null);

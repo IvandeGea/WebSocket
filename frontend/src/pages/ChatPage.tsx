@@ -26,7 +26,6 @@ const ChatPage = () => {
         });
     
         if (!response.ok) {
-          // Manejar el caso en que la respuesta no es exitosa (por ejemplo, 401 No Autorizado)
           console.error('Error al obtener mensajes:', response.statusText);
           return;
         }
@@ -49,26 +48,36 @@ const ChatPage = () => {
     setMessages((prevMessages) => [...prevMessages, { text: newMessage, user: 'Yo' }]);
   };
 
-
   return (
-<Flex className="chat" direction="column" justify="center" align="center" h="100vh">
-      <Box
-        w={{ base: '100%', sm: '80%', md: '70%', lg: '50%' }}
-        p={{ base: 3, md: 6 }}
-        bg="white"
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90vh' }}>
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90vh' }}>
+      <Flex
+        direction="column"
+        alignItems="center"
+        p={4}
         borderRadius="lg"
-        borderWidth="1px"
         boxShadow="lg"
       >
-        <Text fontSize="2xl" fontWeight="bold" mb="4">
-          Chat de la Comunidad
-        </Text>
+        <LogoutButton />
+        <Box
+          bg="white"
+          p={6}
+          borderRadius="lg"
+          borderWidth="1px"
+          w={{ base: "100%", md: "70%", lg: "50%" }}
+        >
+          <Text fontSize="2xl" fontWeight="bold" mb={4}>
+            Chat de la Comunidad
+          </Text>
 
-        <ChatWindow messages={messages} />
-        <ChatInput onSendMessage={handleSendMessage} />
-      </Box>
-    </Flex>
+          <ChatWindow messages={messages} />
+          <ChatInput onSendMessage={handleSendMessage} />
+        </Box>
+      </Flex>
+    </div>
+    </div>
   );
+  
 };
 
 export default ChatPage;

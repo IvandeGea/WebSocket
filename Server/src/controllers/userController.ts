@@ -2,14 +2,16 @@ import { Request, Response } from 'express';
 import User, { UserDocument } from '../db/userSchema';
 import { Message } from '../db/userSchema';
 
+
 interface NewMessage {
   text: string;
   createdAt: Date;
 }
+// Controlador para enviar un mensaje
 
 export const addMessageById = async (req: Request, res: Response) => {
   try {
-    // Obtén el ID del usuario desde la URL
+
     const userId = req.params.id;
 
     if (!userId) {
@@ -49,17 +51,16 @@ export const addMessageById = async (req: Request, res: Response) => {
   }
 };
 
-//muestra todos los mensajes
 
 
 
+// Controlador para obtener todos los mensajes
 export const getAllMessages = async (req: Request, res: Response) => {
   try {
 
-    // Obtener todos los usuarios con mensajes
     const usersWithMessages: UserDocument[] = await User.find({ messages: { $exists: true, $ne: [] } });
     
-    
+
     const allMessages: { text: string; createdAt: Date; userName: string }[] = usersWithMessages.reduce(
       (messages: { text: string; createdAt: Date; userName: string }[], user: UserDocument) => {
         const userName = user.displayName  
@@ -82,22 +83,27 @@ export const getAllMessages = async (req: Request, res: Response) => {
   }
 };
 
-export const logout = (req: Request, res: Response) => {
-  
-  (req.logout as any)();
 
+
+// Controlador para cerrar la sesión
+export const logoutController = (req: Request, res: Response) => {
  
-  req.session.destroy(() => {
-   
-    res.setHeader('Set-Cookie', [
-      'connect.sid=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/',
-      'displayName=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/',
-      'userId=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/',
-    ]);
-
+  req.logout((error) => {
+    if (error) {
+      console.error('Error al cerrar sesión:', error);
+      res.status(500).send('Error al cerrar sesión');
+    } else {
+      req.session.destroy(() => {
+        res.clearCookie('connect.sid'); 
+      
+        res.send('Logout exitoso');
+      });
+    }
   });
 };
 
 
-//autentificacion y creacion de usuarios
+
+
+
 

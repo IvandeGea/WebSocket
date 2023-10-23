@@ -10,11 +10,10 @@ import cors from "cors"
 import cookieParser from 'cookie-parser';
 import http from "http";
 import { Server as SocketIOServer, Socket } from 'socket.io';
-import { isLoggedIn } from './middleware';
 
 const app = express();
 
-const server = http.createServer(app); // Crea un servidor HTTP usando express
+const server = http.createServer(app); 
 
 const corsOptions = {
   origin: 'http://localhost:5173',  
@@ -37,7 +36,7 @@ app.use(
   session({
     secret: 'keyboard cat',
     resave: false,
-    saveUninitialized: true
+    saveUninitialized: false
   })
 );
 
@@ -60,13 +59,6 @@ app.get(
   })
 );
 
-// app.get('/logout',isLoggedIn,(req: Request, res: Response) => {
-//   (req.logout as any)();
-//   req.session.destroy(() => {
-//     res.send('Goodbye!');
-//   });
-// });
-
 app.get('/auth/google/failure', (req: Request, res: Response) => {
   res.send('Failed to authenticate..');
 });
@@ -86,10 +78,10 @@ app.use((err: any, req: Request, res: Response, next: NextFunction) => {
 io.on('connection', (socket: Socket) => {
   console.log('Usuario conectado:', socket.id);
 
-  // Escucha el evento 'message' y emite el mensaje a todos los clientes
+
   socket.on('message', (data) => {
     console.log('Nuevo mensaje:', data);
-    io.emit('message', data); // Aquí envía tanto el texto como el nombre de usuario
+    io.emit('message', data); 
   });
 
   // Maneja la desconexión del usuario

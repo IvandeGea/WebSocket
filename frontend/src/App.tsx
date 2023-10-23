@@ -8,10 +8,7 @@ function App() {
 
 
   return (<div className="App">
-  <nav>
-    {/* <Link href="/home">Home</Link>
-    <Link href="/chat">Chat</Link> */}
-  </nav>
+
  
   <Route path="/" component={HomePage} exact/>
   <Route path="/chat"

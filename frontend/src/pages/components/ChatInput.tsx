@@ -11,6 +11,7 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSendMessage }) => {
   const handleSendMessage = async () => {
     console.log('Click en enviar');
     console.log('Message:', message);
+    
 
     // Obtén el valor de la cookie 'userId'
     const userIdCookie = document.cookie
